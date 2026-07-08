@@ -1,0 +1,81 @@
+{% extends 'reviews/base.html' %}
+{% load reviews_extras %}
+
+{% block title %}{{ movie.title }} — Movie Review Platform{% endblock %}
+
+{% block content %}
+    <div class="movie-detail">
+        {% if movie.poster %}
+            <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="movie-detail-poster">
+        {% endif %}
+
+        <div class="movie-detail-info">
+            <h1>{{ movie.title }} <span class="year">({{ movie.release_year }})</span></h1>
+            <p class="genre-tag">{{ movie.genre.name }}</p>
+            <p class="stars-large">{{ movie.rating|star_rating }} <span>{{ movie.rating }}/10</span></p>
+
+            {% if movie.box_office %}
+                <p>Кассовые сборы: <strong>${{ movie.box_office }}</strong></p>
+            {% endif %}
+
+            <p class="description">{{ movie.description }}</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Отзывы критиков и пользователей ({{ reviews|length }})</h2>
+
+    {% if reviews %}
+        <div class="review-list">
+            {% for review in reviews %}
+                <div class="review-card">
+                    <div class="review-header">
+                        <strong>{{ review.user.username }}</strong>
+                        <span class="review-score">{{ review.score }}/10</span>
+                        <span class="review-date">{{ review.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    <p>{{ review.text }}</p>
+
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'like_review' review.pk %}" method="post" class="inline-form">
+                            {% csrf_token %}
+                            {% if user in review.likes.all %}
+                                <button type="submit" class="like-btn liked">❤️ {{ review.likes_count }}</button>
+                            {% else %}
+                                <button type="submit" class="like-btn">🤍 {{ review.likes_count }}</button>
+                            {% endif %}
+                        </form>
+                    {% else %}
+                        <span class="like-count">🤍 {{ review.likes_count }}</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-state">Отзывов пока нет. Будьте первым!</p>
+    {% endif %}
+
+    <hr>
+
+    {% if user.is_authenticated %}
+        <h3>Оставить отзыв</h3>
+        <form action="{% url 'add_review' movie.pk %}" method="post" class="review-form">
+            {% csrf_token %}
+            {% for field in review_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="field-error">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-primary">Отправить отзыв</button>
+        </form>
+    {% else %}
+        <p class="empty-state">
+            <a href="{% url 'login' %}">Войдите</a>, чтобы оставить отзыв.
+        </p>
+    {% endif %}
+{% endblock %}

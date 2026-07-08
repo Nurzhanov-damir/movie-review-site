@@ -1,0 +1,28 @@
+{% extends 'reviews/base.html' %}
+
+{% block title %}Регистрация — Movie Review Platform{% endblock %}
+
+{% block content %}
+    <div class="auth-form-wrapper">
+        <h1>Регистрация</h1>
+
+        <form method="post" class="auth-form" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="field-error">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-primary btn-block">Зарегистрироваться</button>
+        </form>
+
+        <p class="auth-switch">Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+    </div>
+{% endblock %}

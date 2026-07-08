@@ -1,0 +1,42 @@
+{% extends 'reviews/base.html' %}
+{% load reviews_extras %}
+
+{% block title %}Фильмы — Movie Review Platform{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Каталог фильмов</h1>
+
+    <form method="get" class="filters-bar">
+        {{ search_form.query }}
+        {{ filter_form.genre }}
+        {{ filter_form.min_rating }}
+        <button type="submit" class="btn-primary">Применить</button>
+        <a href="{% url 'movie_list' %}" class="btn-secondary">Сбросить</a>
+    </form>
+
+    {% if movies %}
+        <div class="movie-grid">
+            {% for movie in movies %}
+                <a href="{% url 'movie_detail' movie.pk %}" class="movie-card">
+                    {% if movie.poster %}
+                        <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="movie-poster">
+                    {% else %}
+                        <div class="movie-poster placeholder">Нет постера</div>
+                    {% endif %}
+
+                    <div class="movie-card-body">
+                        <h3>{{ movie.title }} <span class="year">({{ movie.release_year }})</span></h3>
+                        <p class="genre-tag">{{ movie.genre.name }}</p>
+                        <p class="stars">{{ movie.rating|star_rating }} <span>{{ movie.rating }}</span></p>
+
+                        {% if movie.box_office %}
+                            <p class="box-office">Сборы: ${{ movie.box_office }}</p>
+                        {% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-state">По вашему запросу фильмы не найдены.</p>
+    {% endif %}
+{% endblock %}

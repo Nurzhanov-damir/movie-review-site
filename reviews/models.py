@@ -31,7 +31,7 @@ class Movie(models.Model):
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE, related_name='movies')
     poster = models.ImageField(upload_to='posters/', null=True, blank=True)
 
-    objects = MovieManager()  # кастомный менеджер (опциональный пункт закрыт)
+    objects = MovieManager()
 
     def __str__(self):
         return self.title
@@ -43,6 +43,10 @@ class Review(models.Model):
     text = models.TextField()
     score = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(User, related_name='liked_reviews', blank=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.movie.title}"
+
+    def likes_count(self):
+        return self.likes.count()
