@@ -1,0 +1,286 @@
+{
+  "info": {
+    "name": "Movie Review API",
+    "_postman_id": "b6f2a4b0-1a2b-4c3d-9e5f-movie-review-api",
+    "description": "Коллекция запросов для Movie Review API (Django REST Framework). Часть 3 проекта: token-based аутентификация, CRUD для отзывов, фильтры фильмов и критики.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000/api" },
+    { "key": "token", "value": "" },
+    { "key": "review_id", "value": "1" },
+    { "key": "movie_id", "value": "1" },
+    { "key": "genre_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (get token)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"testpass123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/login/", "host": ["{{base_url}}"], "path": ["login", ""] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"token\": \"9944b09199c62bcf9418ad846dd0e4bbdfc6ee4\",\n  \"user_id\": 1,\n  \"username\": \"testuser\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout (delete token)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Token {{token}}" }],
+            "url": { "raw": "{{base_url}}/logout/", "host": ["{{base_url}}"], "path": ["logout", ""] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"detail\": \"Вы успешно вышли из системы.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Movies (FBV)",
+      "item": [
+        {
+          "name": "List movies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/movies/", "host": ["{{base_url}}"], "path": ["movies", ""] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Inception\",\n    \"description\": \"A thief who steals corporate secrets...\",\n    \"release_year\": 2010,\n    \"box_office\": \"825500000.00\",\n    \"rating\": 8.8,\n    \"genre\": 1,\n    \"genre_name\": \"Sci-Fi\",\n    \"poster\": null,\n    \"reviews_count\": 2\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "List movies (filter: genre, min_rating, search, top_rated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/movies/?genre={{genre_id}}&min_rating=7&search=incep&top_rated=1",
+              "host": ["{{base_url}}"],
+              "path": ["movies", ""],
+              "query": [
+                { "key": "genre", "value": "{{genre_id}}" },
+                { "key": "min_rating", "value": "7" },
+                { "key": "search", "value": "incep" },
+                { "key": "top_rated", "value": "1" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Critics (FBV)",
+      "item": [
+        {
+          "name": "List critics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/critics/", "host": ["{{base_url}}"], "path": ["critics", ""] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Roger Ebert\",\n    \"publication\": \"Chicago Sun-Times\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Create critic (auth required)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Token {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Anton Ego\",\n  \"publication\": \"Le Chic Eater\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/critics/", "host": ["{{base_url}}"], "path": ["critics", ""] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 2,\n  \"name\": \"Anton Ego\",\n  \"publication\": \"Le Chic Eater\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reviews (CBV, full CRUD)",
+      "item": [
+        {
+          "name": "List reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/reviews/", "host": ["{{base_url}}"], "path": ["reviews", ""] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "[\n  {\n    \"id\": 1,\n    \"movie\": 1,\n    \"movie_title\": \"Inception\",\n    \"user\": \"testuser\",\n    \"text\": \"Great movie!\",\n    \"score\": 9,\n    \"created_at\": \"2026-07-08T10:00:00Z\",\n    \"likes_count\": 3\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "List reviews for a movie",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews/?movie={{movie_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", ""],
+              "query": [{ "key": "movie", "value": "{{movie_id}}" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create review (auth required)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Token {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movie\": {{movie_id}},\n  \"text\": \"Absolutely loved the plot twists.\",\n  \"score\": 9\n}"
+            },
+            "url": { "raw": "{{base_url}}/reviews/", "host": ["{{base_url}}"], "path": ["reviews", ""] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 5,\n  \"movie\": 1,\n  \"movie_title\": \"Inception\",\n  \"user\": \"testuser\",\n  \"text\": \"Absolutely loved the plot twists.\",\n  \"score\": 9,\n  \"created_at\": \"2026-07-08T10:05:00Z\",\n  \"likes_count\": 0\n}"
+            },
+            {
+              "name": "400 Bad Request (invalid score)",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"score\": [\"Оценка должна быть от 1 до 10.\"]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Retrieve review",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "{{review_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update review (PUT, owner only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Token {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movie\": {{movie_id}},\n  \"text\": \"Updated: still a masterpiece.\",\n  \"score\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "{{review_id}}", ""]
+            }
+          },
+          "response": [
+            {
+              "name": "403 Forbidden (not the owner)",
+              "status": "Forbidden",
+              "code": 403,
+              "body": "{\n  \"detail\": \"Вы не можете редактировать чужой отзыв.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Partial update review (PATCH, owner only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Token {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 7\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "{{review_id}}", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete review (owner only)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Token {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/reviews/{{review_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["reviews", "{{review_id}}", ""]
+            }
+          },
+          "response": [
+            {
+              "name": "204 No Content",
+              "status": "No Content",
+              "code": 204,
+              "body": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

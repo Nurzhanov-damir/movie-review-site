@@ -1,0 +1,30 @@
+{% extends 'reviews/base.html' %}
+
+{% block title %}Вход — Movie Review Platform{% endblock %}
+
+{% block content %}
+    <div class="auth-form-wrapper">
+        <h1>Вход</h1>
+
+        {% if form.errors %}
+            <div class="message error">Неверный логин или пароль. Попробуйте ещё раз.</div>
+        {% endif %}
+
+        <form method="post" class="auth-form" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="field-error">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <button type="submit" class="btn-primary btn-block">Войти</button>
+        </form>
+
+        <p class="auth-switch">Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a></p>
+    </div>
+{% endblock %}

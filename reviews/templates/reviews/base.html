@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Movie Review Platform{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-inner">
+            <a href="{% url 'movie_list' %}" class="logo">🎬 MovieReviews</a>
+
+            <nav class="nav-links">
+                <a href="{% url 'movie_list' %}">Фильмы</a>
+
+                {% if nav_genres %}
+                <div class="dropdown">
+                    <span class="dropdown-toggle">Жанры ▾</span>
+                    <div class="dropdown-menu">
+                        {% for genre in nav_genres %}
+                            <a href="{% url 'movie_list' %}?genre={{ genre.id }}">{{ genre.name }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                    <span class="nav-user">👤 {{ user.username }}</span>
+                    <form action="{% url 'logout' %}" method="post" class="inline-form">
+                        {% csrf_token %}
+                        <button type="submit" class="link-button">Выйти</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">Войти</a>
+                    <a href="{% url 'register' %}" class="btn-nav">Регистрация</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Movie Review Platform — KBTU project</p>
+    </footer>
+</body>
+</html>
